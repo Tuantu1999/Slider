@@ -24,12 +24,13 @@ The component should simulate real-world use cases such as **banner sliders, new
 **Styling:** CSS3 (Flexbox/Transitions)
 
 # Installation & Getting Started
-git clone https://github.com/Tuantu1999/Slider.git
-cd Slider
-npm install
-npm run dev
+* git clone https://github.com/Tuantu1999/Slider.git
+* cd Slider
+* npm install
+* npm run dev
 
 # Project Structure
+```text
 SLIDER/
 ├── src/
 │   ├── assets/
