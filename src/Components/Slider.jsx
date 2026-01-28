@@ -8,6 +8,7 @@ const Slider = ({ items = [] }) => {
   const [dragDistance, setDragDistance] = useState(0);
   const sliderRef = useRef(null);
   const autoPlayRef = useRef(null);
+  const skipClickRef = useRef(false);
 
   const CARD_WIDTH = 300;
   const MIN_DRAG_DISTANCE = 40;
@@ -21,7 +22,7 @@ const Slider = ({ items = [] }) => {
       setCurrentIndex((prev) => (prev + 1) % totalItems);
     }, AUTO_SCROLL_INTERVAL);
 
-    return () => clearInterval(autoPlayRef.current);
+    return () => clearInterval(autoPlayRef.current); // Cleanup function
   }, [isAutoPlay, isDragging, totalItems]);
 
   const handleMouseDown = (e) => {
@@ -30,11 +31,13 @@ const Slider = ({ items = [] }) => {
     setDragStart(e.clientX);
     setDragDistance(0);
     setIsAutoPlay(false);
+    skipClickRef.current = false;
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     const currentDrag = e.clientX - dragStart;
+    if (Math.abs(currentDrag) > 5) skipClickRef.current = true;
     setDragDistance(currentDrag);
   };
 
@@ -44,11 +47,13 @@ const Slider = ({ items = [] }) => {
     setDragStart(e.touches[0].clientX);
     setDragDistance(0);
     setIsAutoPlay(false);
+    skipClickRef.current = false;
   };
 
   const handleTouchMove = (e) => {
     if (!isDragging) return;
     const currentDrag = e.touches[0].clientX - dragStart;
+    if (Math.abs(currentDrag) > 5) skipClickRef.current = true;
     setDragDistance(currentDrag);
   };
 
@@ -67,10 +72,8 @@ const Slider = ({ items = [] }) => {
 
     if (Math.abs(distance) >= MIN_DRAG_DISTANCE) {
       if (distance > 0) {
-        // Dragged left, move to next (infinite loop)
         setCurrentIndex((prev) => (prev + 1) % totalItems);
       } else {
-        // Dragged right, move to previous (infinite loop)
         setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems);
       }
     }
@@ -88,10 +91,10 @@ const Slider = ({ items = [] }) => {
     setIsAutoPlay(true);
   };
 
-  const handleCardClick = (e, landingPage) => {
-    // Prevent click if dragging
-    if (Math.abs(dragDistance) >= MIN_DRAG_DISTANCE) {
+  const handleClick = (e, landingPage) => {
+    if (skipClickRef.current || Math.abs(dragDistance) >= MIN_DRAG_DISTANCE) {
       e.stopPropagation();
+      skipClickRef.current = false;
       return;
     }
 
@@ -102,7 +105,7 @@ const Slider = ({ items = [] }) => {
 
   return (
     <div
-      className="slider-container elevation-3"
+      className={`slider-container elevation-3 ${isDragging ? "dragging" : ""}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown}
@@ -123,12 +126,12 @@ const Slider = ({ items = [] }) => {
         {items.map((item, index) => (
           <div key={index} className="slider-card">
             <div className="card-content">
-              <p>{item.title}</p>
               <img
                 src={item.image}
                 alt={item.title}
-                onClick={(e) => handleCardClick(e, item.landing_page)}
+                onClick={(e) => handleClick(e, item.landing_page)}
                 className="slider-image"
+                onDragStart={(e) => e.preventDefault()}
               />
             </div>
           </div>
