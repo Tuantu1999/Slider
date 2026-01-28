@@ -50,6 +50,7 @@ SLIDER/
 ├── package.json
 ├── README.md
 └── vite.config.js
+```
 
 # Technical Implementation
 **1. Drag (Mouse) and Swipe (Touch)**
